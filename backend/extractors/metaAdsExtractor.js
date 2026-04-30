@@ -30,24 +30,26 @@ class MetaAdsExtractor {
             
             $('script').each((i, el) => {
                 const content = $(el).html();
-                if (content && (content.includes('page_name') || content.includes('ad_copy'))) {
-                    // Search for both page names and ad copy matches
-                    const adRegex = /"ad_copy_text":"([^"]+)"/g;
-                    const pageRegex = /"page_name":"([^"]+)"/g;
+                if (content && (content.includes('page_name') || content.includes('ad_copy_text') || content.includes('body'))) {
+                    // Broader regex to catch page names and ad copies in obfuscated JSON
+                    const pageNames = content.match(/"page_name":"([^"]+)"/g) || [];
+                    const adTexts = content.match(/"ad_copy_text":"([^"]+)"/g) || [];
                     
-                    let adMatch;
-                    while ((adMatch = adRegex.exec(content)) !== null) {
-                        const copy = adMatch[1];
-                        // If the copy matches our keyword (or is part of the search)
-                        if (copy.toLowerCase().includes(keyword.toLowerCase())) {
-                            // Find the nearest page name associated with this ad
-                            // (Simplified logic for now)
-                            companies.push({ 
-                                name: "Empresa con Anuncio: " + keyword, 
-                                ads: [{ text: copy }] 
-                            });
+                    pageNames.forEach((pn, idx) => {
+                        const name = pn.split('":"')[1].replace('"', '');
+                        if (name && !companies.find(c => c.name === name)) {
+                            // Find a corresponding ad text if possible
+                            const adText = adTexts[idx] ? adTexts[idx].split('":"')[1].replace('"', '') : '';
+                            
+                            // If user searched for copy, only include if matches
+                            if (adText.toLowerCase().includes(keyword.toLowerCase()) || name.toLowerCase().includes(keyword.toLowerCase())) {
+                                companies.push({ 
+                                    name: name, 
+                                    ads: adText ? [{ text: adText }] : [] 
+                                });
+                            }
                         }
-                    }
+                    });
                 }
             });
 
