@@ -4,6 +4,8 @@ const helmet = require('helmet');
 const dotenv = require('dotenv');
 const path = require('path');
 
+console.log('--- SISTEMA INICIANDO (VERSIÓN 1.2) ---');
+
 dotenv.config();
 
 const app = express();
