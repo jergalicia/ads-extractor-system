@@ -20,66 +20,133 @@ const SearchPage = () => {
       setResults(response.data.data || []);
     } catch (error) {
       console.error('Search error:', error);
-      alert(`Error: ${error.message}`);
+      alert(`Error en la búsqueda: ${error.message}`);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleOpenDetails = (company) => {
+    console.log("Abriendo detalles para:", company.name);
+    setSelectedCompany(company);
+    setShowDetails(true);
+  };
+
   return (
-    <div className="space-y-8 p-4">
-      <h2 className="text-3xl font-bold text-white">Buscador</h2>
-      
-      <div className="bg-slate-800 p-6 rounded-xl border border-slate-700">
-        <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <input 
-            type="text" 
-            placeholder="Palabra clave" 
-            className="bg-slate-900 text-white p-3 rounded-lg border border-slate-700"
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-          />
-          <select className="bg-slate-900 text-white p-3 rounded-lg border border-slate-700" value={country} onChange={(e) => setCountry(e.target.value)}>
-            <option value="PA">Panamá</option>
-            <option value="CO">Colombia</option>
-          </select>
-          <select className="bg-slate-900 text-white p-3 rounded-lg border border-slate-700" value={status} onChange={(e) => setStatus(e.target.value)}>
-            <option value="active">Activos</option>
-          </select>
-          <button type="submit" className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-lg transition-colors">
-            {loading ? 'Buscando...' : 'Buscar'}
-          </button>
+    <div className="space-y-8 animate-fade-in-up">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-4xl font-black text-white tracking-tight">Buscador Inteligente</h2>
+          <p className="text-slate-400 mt-2 text-lg">Localiza prospectos con datos reales de contacto.</p>
+        </div>
+      </div>
+
+      {/* Buscador */}
+      <div className="glass-card p-8 border border-white/5 bg-slate-900/50">
+        <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="md:col-span-1">
+            <label className="block text-slate-400 text-xs font-bold uppercase tracking-widest mb-3">Palabra Clave</label>
+            <input
+              type="text"
+              className="w-full bg-white/5 border-white/10 text-white p-3 rounded-lg focus:border-indigo-500 transition-all outline-none"
+              placeholder="Ej: Clínica dental"
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-slate-400 text-xs font-bold uppercase tracking-widest mb-3">País</label>
+            <select className="w-full bg-white/5 border-white/10 text-white p-3 rounded-lg outline-none" value={country} onChange={(e) => setCountry(e.target.value)}>
+              <option value="PA">Panamá</option>
+              <option value="CO">Colombia</option>
+              <option value="MX">México</option>
+              <option value="ES">España</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-slate-400 text-xs font-bold uppercase tracking-widest mb-3">Estado</label>
+            <select className="w-full bg-white/5 border-white/10 text-white p-3 rounded-lg outline-none" value={status} onChange={(e) => setStatus(e.target.value)}>
+              <option value="active">Activos</option>
+              <option value="all">Todos</option>
+            </select>
+          </div>
+          <div className="flex items-end">
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary w-full py-3 font-bold text-sm uppercase tracking-widest"
+            >
+              {loading ? 'Buscando Leads...' : 'Iniciar Extracción'}
+            </button>
+          </div>
         </form>
       </div>
 
-      <div className="grid grid-cols-1 gap-4">
-        {results.map((company, index) => (
-          <div key={index} className="bg-slate-800 p-6 rounded-xl border border-slate-700 flex justify-between items-center">
-            <div>
-              <h3 className="text-xl font-bold text-white">{company.name}</h3>
-              <p className="text-slate-400">Anuncios detectados: {company.ads?.length || 1}</p>
+      {/* Listado de Resultados */}
+      {results.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {results.map((company, index) => (
+            <div key={index} className="glass-card p-6 border border-white/5 hover:border-indigo-500/50 transition-all group">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-pink-500 flex items-center justify-center text-xl font-black text-white shadow-lg">
+                  {company.name?.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <h3 className="text-white font-bold text-lg leading-tight group-hover:text-indigo-400 transition-colors">{company.name}</h3>
+                  <p className="text-slate-500 text-xs uppercase font-bold tracking-widest mt-1">{country} • {company.ads?.length || 1} Anuncios</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => handleOpenDetails(company)}
+                className="w-full bg-white/5 hover:bg-indigo-600 text-white py-2 rounded-lg font-bold text-xs uppercase tracking-widest transition-all"
+              >
+                Ver Detalles de Contacto
+              </button>
             </div>
-            <button 
-              onClick={() => { setSelectedCompany(company); setShowDetails(true); }}
-              className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg"
-            >
-              Ver Detalles
-            </button>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
+      {/* Modal de Detalles Estilo Apple */}
       {showDetails && selectedCompany && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-800 p-8 rounded-2xl border border-slate-700 max-w-md w-full relative">
-            <button onClick={() => setShowDetails(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl">&times;</button>
-            <h3 className="text-2xl font-bold text-white mb-4">{selectedCompany.name}</h3>
-            <div className="space-y-4 text-slate-300">
-              <p><strong>Email:</strong> contacto@{selectedCompany.name?.toLowerCase().replace(/\s/g, '')}.com</p>
-              <p><strong>Teléfono:</strong> +507 6000-0000</p>
-              <div className="pt-4 flex gap-2">
-                <button className="flex-1 bg-green-600 py-2 rounded-lg font-bold">WhatsApp</button>
-                <button className="flex-1 bg-indigo-600 py-2 rounded-lg font-bold">Meta Ads</button>
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 z-[9999] animate-fade-in">
+          <div className="bg-slate-900 border border-white/10 max-w-lg w-full p-8 rounded-3xl relative shadow-[0_0_50px_rgba(79,70,229,0.3)]">
+            <button 
+              onClick={() => setShowDetails(false)}
+              className="absolute top-6 right-6 text-slate-500 hover:text-white text-3xl font-light"
+            >
+              &times;
+            </button>
+            
+            <div className="flex items-center gap-6 mb-8">
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-pink-500 flex items-center justify-center text-4xl font-black text-white shadow-2xl">
+                {selectedCompany.name?.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <h3 className="text-3xl font-black text-white">{selectedCompany.name}</h3>
+                <p className="text-indigo-400 font-bold uppercase text-[10px] tracking-[0.3em] mt-1">Prospecto Detectado</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Email de Contacto</p>
+                <p className="text-white font-semibold">{selectedCompany.email || `contacto@${selectedCompany.name?.toLowerCase().replace(/\s/g, '')}.com`}</p>
+              </div>
+              
+              <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Teléfono / WhatsApp</p>
+                <p className="text-white font-semibold">{selectedCompany.phone || '+507 6000-0000'}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 pt-4">
+                <button className="bg-green-600 hover:bg-green-500 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-green-900/20">
+                  WhatsApp
+                </button>
+                <button className="bg-indigo-600 hover:bg-indigo-500 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-indigo-900/20">
+                  Ver Ads
+                </button>
               </div>
             </div>
           </div>
