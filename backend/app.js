@@ -51,15 +51,35 @@ app.get('/health', (req, res) => {
     res.json({ status: 'OK', timestamp: new Date() });
 });
 
-// Serve static files in production - Verified absolute path for Hostinger
-const publicPath = '/home/u294757052/public_html/dist';
+// Serve static files in production - Smart path resolution for Hostinger
+const fs = require('fs');
+const possiblePaths = [
+    '/home/u294757052/public_html/dist',
+    '/home/u294757052/domains/extra.agencianitro.com/public_html/dist',
+    path.join(__dirname, '../public_html/dist'),
+    path.join(__dirname, '../dist')
+];
+
+let publicPath = possiblePaths[0];
+for (const p of possiblePaths) {
+    if (fs.existsSync(p)) {
+        publicPath = p;
+        console.log(`>>> FOUND STATIC FILES AT: ${p} <<<`);
+        break;
+    }
+}
 
 app.use(express.static(publicPath));
 
 // Catch-all route to serve the frontend index.html for SPA routing
 app.get('*', (req, res) => {
     if (req.path.startsWith('/api')) return; // Don't catch API routes
-    res.sendFile(path.join(publicPath, 'index.html'));
+    const indexPath = path.join(publicPath, 'index.html');
+    if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath);
+    } else {
+        res.status(404).send(`Not Found - Checked: ${publicPath}`);
+    }
 });
 
 app.listen(PORT, () => {
