@@ -48,17 +48,17 @@ exports.search = async (req, res) => {
                     (company_name, keyword_search, country, facebook_url, website_url, email, phone, whatsapp, ads_status, ads_count, opportunity_score) 
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                     [
-                        companyData.name, 
-                        keyword, 
+                        companyData.name || 'Sin Nombre', 
+                        keyword || '', 
                         country || 'ALL', 
                         companyData.facebookUrl || '', 
-                        details.website, 
-                        details.email, 
-                        details.phone, 
-                        details.whatsapp, 
+                        details.website || null, 
+                        details.email || null, 
+                        details.phone || null, 
+                        details.whatsapp || null, 
                         status || 'active',
-                        companyData.ads.length,
-                        Math.floor(Math.random() * 100) // Mock score
+                        (companyData.ads && companyData.ads.length) || 0,
+                        Math.floor(Math.random() * 100)
                     ]
                 );
                 companyId = insertResult.insertId;
@@ -66,12 +66,23 @@ exports.search = async (req, res) => {
             }
 
             // Save ads
-            for (const ad of companyData.ads) {
-                await db.execute(
-                    'INSERT INTO ads (company_id, ad_type, ad_text, ad_image, ad_video, platform, ad_status, ad_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-                    [companyId, ad.type, ad.text, ad.image, ad.video, ad.platform, ad.status, ad.date]
-                );
-                totalAds++;
+            if (companyData.ads && Array.isArray(companyData.ads)) {
+                for (const ad of companyData.ads) {
+                    await db.execute(
+                        'INSERT INTO ads (company_id, ad_type, ad_text, ad_image, ad_video, platform, ad_status, ad_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                        [
+                            companyId, 
+                            ad.type || 'text', 
+                            ad.text || '', 
+                            ad.image || null, 
+                            ad.video || null, 
+                            ad.platform || 'facebook', 
+                            ad.status || 'active', 
+                            ad.date || new Date()
+                        ]
+                    );
+                    totalAds++;
+                }
             }
         }
 
