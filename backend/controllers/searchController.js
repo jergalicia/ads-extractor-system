@@ -88,7 +88,11 @@ exports.search = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Search error:', error);
-        res.status(500).json({ error: 'Internal server error during extraction' });
+        console.error('SEARCH CONTROLLER ERROR:', error);
+        res.status(500).json({ 
+            error: 'Error durante la extracción', 
+            details: error.message,
+            tip: 'Asegúrate de que las tablas de la base de datos existan.'
+        });
     }
 };
