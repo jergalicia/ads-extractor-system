@@ -1,4 +1,4 @@
-import React from 'react';
+// Dashboard.jsx
 import { Building2, MousePointer2, Globe2, Briefcase } from 'lucide-react';
 import StatCard from '../components/StatCard';
 import { motion } from 'framer-motion';
