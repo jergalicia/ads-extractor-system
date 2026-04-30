@@ -29,29 +29,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Diagnostic route to find paths
-app.get('/api/debug-path', (req, res) => {
-    const fs = require('fs');
-    try {
-        const paths = [
-            path.join(__dirname, '../'),
-            path.join(__dirname, '../../'),
-            path.join(__dirname, '../../../'),
-            path.join(__dirname, '../../../../')
-        ];
-        const results = {};
-        paths.forEach(p => {
-            try { results[p] = fs.readdirSync(p); } catch(e) { results[p] = "Error: " + e.message; }
-        });
-        res.json({ 
-            currentDir: __dirname, 
-            scanned: results
-        });
-    } catch (e) {
-        res.json({ error: e.message, currentDir: __dirname });
-    }
-});
-
 // Database Connection (Pool)
 const db = require('./database/db');
 
@@ -74,7 +51,7 @@ app.get('/health', (req, res) => {
     res.json({ status: 'OK', timestamp: new Date() });
 });
 
-// Serve static files in production - Using absolute path for Hostinger
+// Serve static files in production - Verified absolute path for Hostinger
 const publicPath = '/home/u294757052/public_html/dist';
 
 app.use(express.static(publicPath));
