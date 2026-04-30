@@ -29,6 +29,22 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Diagnostic route to find paths
+app.get('/api/debug-path', (req, res) => {
+    const fs = require('fs');
+    try {
+        const rootPath = path.join(__dirname, '../../');
+        const contents = fs.readdirSync(rootPath);
+        res.json({ 
+            currentDir: __dirname, 
+            parentContents: contents,
+            message: "Exploring filesystem..."
+        });
+    } catch (e) {
+        res.json({ error: e.message, currentDir: __dirname });
+    }
+});
+
 // Database Connection (Pool)
 const db = require('./database/db');
 
