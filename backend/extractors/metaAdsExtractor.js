@@ -10,16 +10,14 @@ class MetaAdsExtractor {
         try {
             console.log(`Searching ads for: ${keyword} in ${country}`);
             
-            // Meta Ads Library URL for direct scraping
-            const url = `${this.baseUrl}?active_status=${status}&ad_type=all&country=${country}&q=${encodeURIComponent(keyword)}&media_type=all`;
+            // Try the "Ad Library" specific search endpoint
+            const url = `https://www.facebook.com/ads/library/?active_status=${status}&ad_type=all&country=${country}&q=${encodeURIComponent(keyword)}&sort_data[direction]=desc&sort_data[mode]=relevancy_monthly_active&media_type=all`;
             
             const response = await axios.get(url, {
                 headers: {
-                    'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1',
-                    'Accept': '*/*',
-                    'Accept-Language': 'es-ES,es;q=0.9',
-                    'Referer': 'https://www.facebook.com/',
-                    'Origin': 'https://www.facebook.com'
+                    'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                    'Accept-Language': 'en-US,en;q=0.5'
                 }
             });
 
