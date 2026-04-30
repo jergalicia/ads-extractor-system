@@ -51,18 +51,20 @@ app.get('/health', (req, res) => {
     res.json({ status: 'OK', timestamp: new Date() });
 });
 
-// Serve static files in production - Enhanced for Hostinger
+// Serve static files in production - High Compatibility mode
 const publicPath = path.join(__dirname, 'dist');
 
-// Serve assets folder specifically
-app.use('/assets', express.static(path.join(publicPath, 'assets')));
-app.use(express.static(publicPath));
+app.use(express.static(publicPath, {
+    setHeaders: (res, path) => {
+        if (path.endsWith('.css')) res.setHeader('Content-Type', 'text/css');
+        if (path.endsWith('.js')) res.setHeader('Content-Type', 'application/javascript');
+    }
+}));
 
 // Catch-all route to serve the frontend index.html for SPA routing
 app.get('*', (req, res) => {
     if (req.path.startsWith('/api')) return; // Don't catch API routes
-    const indexPath = path.join(publicPath, 'index.html');
-    res.sendFile(indexPath);
+    res.sendFile(path.join(publicPath, 'index.html'));
 });
 
 app.listen(PORT, () => {
