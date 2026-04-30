@@ -51,9 +51,11 @@ app.get('/health', (req, res) => {
     res.json({ status: 'OK', timestamp: new Date() });
 });
 
-// Serve static files in production - Local dist folder
+// Serve static files in production - Enhanced for Hostinger
 const publicPath = path.join(__dirname, 'dist');
 
+// Serve assets folder specifically
+app.use('/assets', express.static(path.join(publicPath, 'assets')));
 app.use(express.static(publicPath));
 
 // Catch-all route to serve the frontend index.html for SPA routing
