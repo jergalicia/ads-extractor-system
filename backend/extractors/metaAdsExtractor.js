@@ -30,14 +30,22 @@ class MetaAdsExtractor {
             
             $('script').each((i, el) => {
                 const content = $(el).html();
-                if (content && content.includes('page_name')) {
-                    // Extract page names from script tags (JSON data)
-                    const regex = /"page_name":"([^"]+)"/g;
-                    let match;
-                    while ((match = regex.exec(content)) !== null) {
-                        const name = match[1];
-                        if (name && !companies.find(c => c.name === name)) {
-                            companies.push({ name, ads: [] });
+                if (content && (content.includes('page_name') || content.includes('ad_copy'))) {
+                    // Search for both page names and ad copy matches
+                    const adRegex = /"ad_copy_text":"([^"]+)"/g;
+                    const pageRegex = /"page_name":"([^"]+)"/g;
+                    
+                    let adMatch;
+                    while ((adMatch = adRegex.exec(content)) !== null) {
+                        const copy = adMatch[1];
+                        // If the copy matches our keyword (or is part of the search)
+                        if (copy.toLowerCase().includes(keyword.toLowerCase())) {
+                            // Find the nearest page name associated with this ad
+                            // (Simplified logic for now)
+                            companies.push({ 
+                                name: "Empresa con Anuncio: " + keyword, 
+                                ads: [{ text: copy }] 
+                            });
                         }
                     }
                 }
