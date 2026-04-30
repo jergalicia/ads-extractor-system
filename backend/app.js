@@ -51,6 +51,21 @@ app.get('/health', (req, res) => {
     res.json({ status: 'OK', timestamp: new Date() });
 });
 
+app.get('/api/debug-path', (req, res) => {
+    const fs = require('fs');
+    try {
+        const publicHtmlPath = '/home/u294757052/public_html';
+        const contents = fs.readdirSync(publicHtmlPath);
+        res.json({ 
+            publicHtmlPath,
+            contents,
+            message: "Checking public_html contents..."
+        });
+    } catch (e) {
+        res.json({ error: e.message });
+    }
+});
+
 // Serve static files in production - Smart path resolution for Hostinger
 const fs = require('fs');
 const possiblePaths = [
