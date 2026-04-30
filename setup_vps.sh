@@ -1,29 +1,38 @@
 #!/bin/bash
 
-# AdsExtractor - VPS Master Setup Script (Ubuntu 24.04)
+# AdsExtractor - VPS SAFE Setup Script (Non-destructive)
 echo "------------------------------------------------"
-echo "🚀 INICIANDO INSTALACIÓN DE ADSEXTRACTOR"
+echo "🛡️ INICIANDO INSTALACIÓN SEGURA (MODO COMPATIBLE)"
 echo "------------------------------------------------"
 
-# 1. Update System
-sudo apt update && sudo apt upgrade -y
+# 1. Update System Packages (Safe)
+sudo apt update
 
-# 2. Install Node.js 22
-curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-sudo apt install -y nodejs
+# 2. Install Node.js 22 (If not present)
+if ! command -v node &> /dev/null
+then
+    curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+    sudo apt install -y nodejs
+fi
 
-# 3. Install Git
+# 3. Install Git (If not present)
 sudo apt install -y git
 
-# 4. Clone Project
+# 4. Clone Project in isolated folder
 cd /root
-git clone https://github.com/jergalicia/ads-extractor-system.git app
-cd app/backend
+if [ -d "app" ]; then
+    echo "⚠️ Carpeta /root/app ya existe. Actualizando código..."
+    cd app && git pull
+else
+    git clone https://github.com/jergalicia/ads-extractor-system.git app
+    cd app
+fi
+cd backend
 
 # 5. Install Dependencies
 npm install
 
-# 6. Install Playwright Browsers & Deps
+# 6. Install Playwright Browsers & Deps (Isolated)
 npx playwright install chromium --with-deps
 
 # 7. Setup Environment
@@ -33,32 +42,16 @@ DB_PASSWORD=Galicia2026*
 DB_NAME=u294757052_extra
 PORT=3000" > .env
 
-# 8. Install PM2 for process management
+# 8. Install PM2 (Process Manager)
 sudo npm install -g pm2
 
-# 9. Start Application
+# 9. Start Application on Port 3000
+pm2 stop all || true
 pm2 start app.js --name "ads-extractor"
 pm2 save
-pm2 startup
-
-# 10. Install Nginx (Optional but recommended)
-sudo apt install -y nginx
-echo "server {
-    listen 80;
-    server_name 89.116.170.62;
-
-    location / {
-        proxy_pass http://localhost:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host \$host;
-        proxy_cache_bypass \$http_upgrade;
-    }
-}" > /etc/nginx/sites-available/default
-sudo systemctl restart nginx
 
 echo "------------------------------------------------"
-echo "✅ INSTALACIÓN COMPLETADA EXITOSAMENTE"
-echo "🌐 Tu plataforma está viva en: http://89.116.170.62"
+echo "✅ INSTALACIÓN SEGURA COMPLETADA"
+echo "🚀 Tu extractor está activo en: http://89.116.170.62:3000"
+echo "ℹ️  No se ha tocado Docker ni Traefik."
 echo "------------------------------------------------"
