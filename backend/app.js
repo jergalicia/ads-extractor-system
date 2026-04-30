@@ -33,12 +33,19 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/api/debug-path', (req, res) => {
     const fs = require('fs');
     try {
-        const rootPath = path.join(__dirname, '../../');
-        const contents = fs.readdirSync(rootPath);
+        const paths = [
+            path.join(__dirname, '../'),
+            path.join(__dirname, '../../'),
+            path.join(__dirname, '../../../'),
+            path.join(__dirname, '../../../../')
+        ];
+        const results = {};
+        paths.forEach(p => {
+            try { results[p] = fs.readdirSync(p); } catch(e) { results[p] = "Error: " + e.message; }
+        });
         res.json({ 
             currentDir: __dirname, 
-            parentContents: contents,
-            message: "Exploring filesystem..."
+            scanned: results
         });
     } catch (e) {
         res.json({ error: e.message, currentDir: __dirname });
