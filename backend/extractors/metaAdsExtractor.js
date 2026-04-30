@@ -8,7 +8,10 @@ class MetaAdsExtractor {
     }
 
     async searchAds(keyword, country = 'ALL', status = 'active') {
-        const browser = await chromium.launch({ headless: true });
+        const browser = await chromium.launch({ 
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+        });
         const context = await browser.newContext({
             userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36'
         });
@@ -61,7 +64,7 @@ class MetaAdsExtractor {
             console.error('Error in searchAds:', error);
             throw error;
         } finally {
-            await browser.close();
+            if (browser) await browser.close();
         }
     }
 
