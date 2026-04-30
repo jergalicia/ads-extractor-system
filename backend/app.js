@@ -40,12 +40,12 @@ app.get('/health', (req, res) => {
 });
 
 // Serve static files in production
-app.use(express.static(path.join(__dirname, '../frontend/dist')));
+app.use(express.static(path.join(__dirname, '../dist')));
 
 // Catch-all route to serve the frontend index.html for SPA routing
 app.get('*', (req, res) => {
     if (req.path.startsWith('/api')) return; // Don't catch API routes
-    res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+    res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
 app.listen(PORT, () => {
