@@ -13,13 +13,14 @@ const SearchPage = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.get(`http://localhost:3000/api/search`, {
+      const response = await axios.get(`/api/search`, {
         params: { keyword, country, status }
       });
       setResults(response.data.data || []);
     } catch (error) {
       console.error('Search error:', error);
-      alert('Error al realizar la búsqueda');
+      const msg = error.response?.data?.details || error.message;
+      alert(`Error en la búsqueda: ${msg}`);
     } finally {
       setLoading(false);
     }

@@ -12,17 +12,17 @@ const CompaniesPage = () => {
 
   const fetchCompanies = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/companies');
-      setCompanies(response.data);
+      const response = await axios.get('/api/companies');
+      setCompanies(response.data.data || []);
     } catch (error) {
-      console.error('Error fetching companies:', error);
+      console.error('Fetch error:', error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleExport = (type) => {
-    window.open(`http://localhost:3000/api/export/${type}`, '_blank');
+    window.open(`/api/export/${type}`, '_blank');
   };
 
   return (
