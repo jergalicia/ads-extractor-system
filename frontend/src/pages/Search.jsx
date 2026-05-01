@@ -27,177 +27,101 @@ const SearchPage = () => {
   };
 
   const handleOpenDetails = (company) => {
-    console.log("Abriendo detalles para:", company.name);
+    console.log("Mostrando detalles para:", company.name);
     setSelectedCompany(company);
     setShowDetails(true);
   };
 
   return (
-    <div className="space-y-8 animate-fade-in-up">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-4xl font-black text-white tracking-tight">Buscador Inteligente</h2>
-          <p className="text-slate-400 mt-2 text-lg">Localiza prospectos con datos reales de contacto.</p>
-        </div>
+    <div style={{ color: 'white', fontFamily: 'sans-serif', padding: '20px' }}>
+      <div style={{ marginBottom: '30px' }}>
+        <h2 style={{ fontSize: '32px', fontWeight: 'bold', margin: 0 }}>Buscador de Leads</h2>
+        <p style={{ color: '#94a3b8', marginTop: '10px' }}>Extracción directa de Meta Ads con datos de contacto.</p>
       </div>
 
-      {/* Buscador */}
-      <div className="glass-card p-8 border border-white/5 bg-slate-900/50">
-        <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="md:col-span-1">
-            <label className="block text-slate-400 text-xs font-bold uppercase tracking-widest mb-3">Palabra Clave</label>
+      {/* Formulario */}
+      <div style={{ background: '#1e293b', padding: '30px', borderRadius: '15px', border: '1px solid #334155', marginBottom: '40px' }}>
+        <form onSubmit={handleSearch} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#64748b' }}>PALABRA CLAVE</label>
             <input
               type="text"
-              className="w-full bg-white/5 border-white/10 text-white p-3 rounded-lg focus:border-indigo-500 transition-all outline-none"
-              placeholder="Ej: Clínica dental"
+              style={{ background: '#0f172a', border: '1px solid #334155', color: 'white', padding: '12px', borderRadius: '8px' }}
+              placeholder="Ej: Clínica"
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
               required
             />
           </div>
-          <div>
-            <label className="block text-slate-400 text-xs font-bold uppercase tracking-widest mb-3">País</label>
-            <select className="w-full bg-white/5 border-white/10 text-white p-3 rounded-lg outline-none" value={country} onChange={(e) => setCountry(e.target.value)}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#64748b' }}>PAÍS</label>
+            <select style={{ background: '#0f172a', border: '1px solid #334155', color: 'white', padding: '12px', borderRadius: '8px' }} value={country} onChange={(e) => setCountry(e.target.value)}>
               <option value="PA">Panamá</option>
               <option value="CO">Colombia</option>
               <option value="MX">México</option>
-              <option value="ES">España</option>
             </select>
           </div>
-          <div>
-            <label className="block text-slate-400 text-xs font-bold uppercase tracking-widest mb-3">Estado</label>
-            <select className="w-full bg-white/5 border-white/10 text-white p-3 rounded-lg outline-none" value={status} onChange={(e) => setStatus(e.target.value)}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#64748b' }}>ESTADO</label>
+            <select style={{ background: '#0f172a', border: '1px solid #334155', color: 'white', padding: '12px', borderRadius: '8px' }} value={status} onChange={(e) => setStatus(e.target.value)}>
               <option value="active">Activos</option>
-              <option value="all">Todos</option>
             </select>
           </div>
-          <div className="flex items-end">
+          <div style={{ display: 'flex', alignItems: 'flex-end' }}>
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary w-full py-3 font-bold text-sm uppercase tracking-widest"
+              style={{ width: '100%', padding: '12px', background: '#6366f1', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
             >
-              {loading ? 'Buscando Leads...' : 'Iniciar Extracción'}
+              {loading ? 'Buscando...' : 'Iniciar Búsqueda'}
             </button>
           </div>
         </form>
       </div>
 
-      {/* Listado de Resultados */}
+      {/* Resultados */}
       {results.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
           {results.map((company, index) => (
-            <div key={index} className="glass-card p-6 border border-white/5 hover:border-indigo-500/50 transition-all group">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-pink-500 flex items-center justify-center text-xl font-black text-white shadow-lg">
+            <div key={index} style={{ background: '#1e293b', padding: '20px', borderRadius: '15px', border: '1px solid #334155' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '15px' }}>
+                <div style={{ width: '45px', height: '45px', background: '#6366f1', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyCenter: 'center', fontWeight: 'bold', fontSize: '20px', justifyContent: 'center' }}>
                   {company.name?.charAt(0).toUpperCase()}
                 </div>
-                <div>
-                  <h3 className="text-white font-bold text-lg leading-tight group-hover:text-indigo-400 transition-colors">{company.name}</h3>
-                  <p className="text-slate-500 text-xs uppercase font-bold tracking-widest mt-1">{country} • {company.ads?.length || 1} Anuncios</p>
-                </div>
+                <h3 style={{ margin: 0, fontSize: '18px' }}>{company.name}</h3>
               </div>
               <button 
                 onClick={() => handleOpenDetails(company)}
-                className="w-full bg-white/5 hover:bg-indigo-600 text-white py-2 rounded-lg font-bold text-xs uppercase tracking-widest transition-all"
+                style={{ width: '100%', padding: '10px', background: 'rgba(99, 102, 241, 0.1)', color: '#818cf8', border: '1px solid rgba(99, 102, 241, 0.2)', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
               >
-                Ver Detalles de Contacto
+                VER DETALLES DE CONTACTO
               </button>
             </div>
           ))}
         </div>
       )}
 
-      {/* Modal de Detalles Blindado */}
+      {/* MODAL DE SEGURIDAD (Totalmente independiente) */}
       {showDetails && selectedCompany && (
-        <div 
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.9)',
-            backdropFilter: 'blur(10px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '20px',
-            zIndex: 999999,
-            animation: 'fade-in 0.3s ease-out'
-          }}
-          onClick={() => setShowDetails(false)}
-        >
-          <div 
-            style={{
-              backgroundColor: '#1e293b',
-              border: '1px solid rgba(255,255,255,0.1)',
-              maxWidth: '600px',
-              width: '100%',
-              padding: '40px',
-              borderRadius: '24px',
-              position: 'relative',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button 
-              onClick={() => setShowDetails(false)}
-              style={{
-                position: 'absolute',
-                top: '20px',
-                right: '20px',
-                color: '#94a3b8',
-                fontSize: '32px',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-            >
-              &times;
-            </button>
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999999 }}>
+          <div style={{ background: '#0f172a', width: '90%', maxWidth: '500px', padding: '40px', borderRadius: '25px', border: '2px solid #6366f1', position: 'relative', boxShadow: '0 0 50px rgba(99, 102, 241, 0.5)' }}>
+            <button onClick={() => setShowDetails(false)} style={{ position: 'absolute', top: '15px', right: '20px', background: 'none', border: 'none', color: '#64748b', fontSize: '30px', cursor: 'pointer' }}>&times;</button>
             
-            <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '30px' }}>
-              <div style={{
-                width: '70px',
-                height: '70px',
-                borderRadius: '16px',
-                background: 'linear-gradient(135deg, #6366f1, #ec4899)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '30px',
-                fontWeight: '900',
-                color: 'white'
-              }}>
-                {selectedCompany.name?.charAt(0).toUpperCase()}
+            <h3 style={{ fontSize: '24px', marginBottom: '5px' }}>{selectedCompany.name}</h3>
+            <p style={{ color: '#6366f1', fontSize: '12px', fontWeight: 'bold', marginBottom: '30px', textTransform: 'uppercase' }}>Datos de Prospecto Encontrados</p>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <div style={{ background: '#1e293b', padding: '15px', borderRadius: '12px' }}>
+                <label style={{ fontSize: '10px', color: '#64748b', fontWeight: 'bold' }}>EMAIL</label>
+                <p style={{ margin: '5px 0 0 0' }}>{selectedCompany.email || `contacto@${selectedCompany.name?.toLowerCase().replace(/\s/g, '')}.com`}</p>
               </div>
-              <div>
-                <h3 style={{ fontSize: '28px', fontWeight: '900', color: 'white', margin: 0 }}>{selectedCompany.name}</h3>
-                <p style={{ color: '#6366f1', fontWeight: 'bold', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '2px', marginTop: '5px' }}>
-                  Prospecto Detectado en {country}
-                </p>
+              <div style={{ background: '#1e293b', padding: '15px', borderRadius: '12px' }}>
+                <label style={{ fontSize: '10px', color: '#64748b', fontWeight: 'bold' }}>TELÉFONO / WHATSAPP</label>
+                <p style={{ margin: '5px 0 0 0' }}>{selectedCompany.phone || '+507 6000-0000'}</p>
               </div>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
-              <div style={{ background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '16px' }}>
-                <p style={{ color: '#64748b', fontSize: '10px', fontWeight: '900', textTransform: 'uppercase', marginBottom: '5px' }}>Email Directo</p>
-                <p style={{ color: 'white', fontWeight: '600' }}>{selectedCompany.email || `contacto@${selectedCompany.name?.toLowerCase().replace(/\s/g, '')}.com`}</p>
-              </div>
-              
-              <div style={{ background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '16px' }}>
-                <p style={{ color: '#64748b', fontSize: '10px', fontWeight: '900', textTransform: 'uppercase', marginBottom: '5px' }}>Teléfono / WhatsApp</p>
-                <p style={{ color: 'white', fontWeight: '600' }}>{selectedCompany.phone || '+507 6000-0000'}</p>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', paddingTop: '10px' }}>
-                <button style={{ background: '#16a34a', color: 'white', padding: '15px', borderRadius: '12px', fontWeight: '900', border: 'none', cursor: 'pointer', fontSize: '12px' }}>
-                  WHATSAPP
-                </button>
-                <button style={{ background: '#4f46e5', color: 'white', padding: '15px', borderRadius: '12px', fontWeight: '900', border: 'none', cursor: 'pointer', fontSize: '12px' }}>
-                  VER ADS
-                </button>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '10px' }}>
+                <button style={{ padding: '15px', background: '#16a34a', color: 'white', border: 'none', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer' }}>WHATSAPP</button>
+                <button style={{ padding: '15px', background: '#4f46e5', color: 'white', border: 'none', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer' }}>VER ADS</button>
               </div>
             </div>
           </div>
