@@ -47,13 +47,15 @@ class MetaAdsExtractor {
             });
 
             // If we didn't find specific ones, we look for common patterns
-            const pageNames = content.match(/"page_name":"([^"]+)"/g) || [];
-            pageNames.forEach(pn => {
-                const name = pn.split('":"')[1].replace('"', '');
+            const pageDataRegex = /"page_name":"([^"]+)","page_id":"(\d+)"/g;
+            let match;
+            while ((match = pageDataRegex.exec(content)) !== null) {
+                const name = match[1];
+                const pageId = match[2];
                 if (name && !companies.find(c => c.name === name)) {
-                    companies.push({ name, ads: [1] });
+                    companies.push({ name, pageId, ads: [1] });
                 }
-            });
+            }
 
             return companies;
 
@@ -65,14 +67,40 @@ class MetaAdsExtractor {
         }
     }
 
-    async getPageDetails(facebookUrl) {
-        return {
-            email: 'contacto@prospecto.com',
-            phone: '+507 6000-0000',
-            website: 'https://prospecto.com',
-            whatsapp: '50760000000',
-            instagram: 'https://instagram.com/prospecto'
-        };
+    async getPageDetails(pageId) {
+        const browser = await chromium.launch({ headless: true });
+        const context = await browser.newContext({
+            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
+        });
+        const page = await context.newPage();
+
+        try {
+            // Visit mobile version for better scraping
+            const url = `https://m.facebook.com/profile.php?id=${pageId}&sk=about`;
+            console.log(`Extracting details from: ${url}`);
+            
+            await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+            // Wait a bit for the data to be injected by React
+            await page.waitForTimeout(3000); 
+            
+            const content = await page.content();
+            
+            // Refined Regex for phone and email
+            const details = {
+                email: (content.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/) || [])[0] || null,
+                phone: (content.match(/\+?[0-9][0-9\s-]{7,14}[0-9]/) || [])[0] || null,
+                website: (content.match(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b/) || [])[0] || null,
+                instagram: (content.match(/instagram\.com\/[a-zA-Z0-9._]+/) || [])[0] || null,
+                facebookUrl: `https://facebook.com/${pageId}`
+            };
+
+            return details;
+        } catch (error) {
+            console.error(`Error getting details for ${pageId}:`, error.message);
+            return {};
+        } finally {
+            await browser.close();
+        }
     }
 }
 

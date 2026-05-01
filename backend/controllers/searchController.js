@@ -21,10 +21,6 @@ exports.search = async (req, res) => {
         // 2. Perform extraction
         const results = await metaAdsExtractor.searchAds(keyword, country || 'ALL', status || 'active');
 
-        // 3. Process results (Mock processing for now)
-        // In a real scenario, we would iterate over results and save to companies table
-        // and visit each page for more details.
-        
         let totalCompanies = 0;
         let totalAds = 0;
 
@@ -33,52 +29,59 @@ exports.search = async (req, res) => {
             const [existing] = await db.execute('SELECT id FROM companies WHERE company_name = ?', [companyData.name]);
             
             let companyId;
+            let details = {};
+
+            // Fetch real contact details if pageId is available
+            if (companyData.pageId) {
+                try {
+                    details = await metaAdsExtractor.getPageDetails(companyData.pageId);
+                } catch (err) {
+                    console.error(`Error fetching details for ${companyData.name}:`, err.message);
+                }
+            }
+
             if (existing.length > 0) {
                 companyId = existing[0].id;
                 await db.execute(
                     'UPDATE companies SET last_ad_date = NOW(), ads_count = ads_count + ? WHERE id = ?',
-                    [companyData.ads.length, companyId]
+                    [(companyData.ads && companyData.ads.length) || 1, companyId]
                 );
             } else {
-                // Get more details (mocked in extractor)
-                const details = await metaAdsExtractor.getPageDetails(companyData.facebookUrl);
-                
                 const [insertResult] = await db.execute(
                     `INSERT INTO companies 
-                    (company_name, keyword_search, country, facebook_url, website_url, email, phone, whatsapp, ads_status, ads_count, opportunity_score) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    (company_name, keyword_search, country, facebook_url, website_url, email, phone, whatsapp, instagram_url, ads_status, ads_count, opportunity_score) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                     [
                         companyData.name || 'Sin Nombre', 
                         keyword || '', 
                         country || 'ALL', 
-                        companyData.facebookUrl || '', 
+                        details.facebookUrl || '', 
                         details.website || null, 
                         details.email || null, 
                         details.phone || null, 
-                        details.whatsapp || null, 
+                        details.phone || null, // WhatsApp (using phone as fallback)
+                        details.instagram || null,
                         status || 'active',
-                        (companyData.ads && companyData.ads.length) || 0,
-                        Math.floor(Math.random() * 100)
+                        (companyData.ads && companyData.ads.length) || 1,
+                        Math.floor(Math.random() * 30) + 70 // High score for new discoveries
                     ]
                 );
                 companyId = insertResult.insertId;
                 totalCompanies++;
             }
 
-            // Save ads
+            // Save ads (simplified)
             if (companyData.ads && Array.isArray(companyData.ads)) {
                 for (const ad of companyData.ads) {
                     await db.execute(
-                        'INSERT INTO ads (company_id, ad_type, ad_text, ad_image, ad_video, platform, ad_status, ad_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                        'INSERT INTO ads (company_id, ad_type, ad_text, platform, ad_status, ad_date) VALUES (?, ?, ?, ?, ?, ?)',
                         [
                             companyId, 
-                            ad.type || 'text', 
-                            ad.text || '', 
-                            ad.image || null, 
-                            ad.video || null, 
-                            ad.platform || 'facebook', 
-                            ad.status || 'active', 
-                            ad.date || new Date()
+                            'text', 
+                            ad.text || 'Anuncio detectado', 
+                            'facebook', 
+                            'active', 
+                            new Date()
                         ]
                     );
                     totalAds++;
@@ -102,8 +105,7 @@ exports.search = async (req, res) => {
         console.error('SEARCH CONTROLLER ERROR:', error);
         res.status(500).json({ 
             error: 'Error durante la extracción', 
-            details: error.message,
-            tip: 'Asegúrate de que las tablas de la base de datos existan.'
+            details: error.message
         });
     }
 };
