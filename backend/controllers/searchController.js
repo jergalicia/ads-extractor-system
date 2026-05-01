@@ -21,17 +21,16 @@ exports.search = async (req, res) => {
         // 2. Perform extraction
         const results = await metaAdsExtractor.searchAds(keyword, country || 'ALL', status || 'active');
 
+        // 3. Process first 5 results for deep extraction to avoid timeouts
+        const topResults = results.slice(0, 5);
         let totalCompanies = 0;
         let totalAds = 0;
 
-        for (const companyData of results) {
-            // Check if company exists
-            const [existing] = await db.execute('SELECT id FROM companies WHERE company_name = ?', [companyData.name]);
-            
+        for (const companyData of topResults) {
             let companyId;
             let details = {};
 
-            // Fetch real contact details if pageId is available
+            // Fetch real contact details
             if (companyData.pageId) {
                 try {
                     details = await metaAdsExtractor.getPageDetails(companyData.pageId);
@@ -39,6 +38,9 @@ exports.search = async (req, res) => {
                     console.error(`Error fetching details for ${companyData.name}:`, err.message);
                 }
             }
+
+            // Check if company exists
+            const [existing] = await db.execute('SELECT id FROM companies WHERE company_name = ?', [companyData.name]);
 
             if (existing.length > 0) {
                 companyId = existing[0].id;
@@ -59,34 +61,19 @@ exports.search = async (req, res) => {
                         details.website || null, 
                         details.email || null, 
                         details.phone || null, 
-                        details.phone || null, // WhatsApp (using phone as fallback)
+                        details.phone || null, 
                         details.instagram || null,
                         status || 'active',
                         (companyData.ads && companyData.ads.length) || 1,
-                        Math.floor(Math.random() * 30) + 70 // High score for new discoveries
+                        Math.floor(Math.random() * 30) + 70
                     ]
                 );
                 companyId = insertResult.insertId;
                 totalCompanies++;
             }
 
-            // Save ads (simplified)
-            if (companyData.ads && Array.isArray(companyData.ads)) {
-                for (const ad of companyData.ads) {
-                    await db.execute(
-                        'INSERT INTO ads (company_id, ad_type, ad_text, platform, ad_status, ad_date) VALUES (?, ?, ?, ?, ?, ?)',
-                        [
-                            companyId, 
-                            'text', 
-                            ad.text || 'Anuncio detectado', 
-                            'facebook', 
-                            'active', 
-                            new Date()
-                        ]
-                    );
-                    totalAds++;
-                }
-            }
+            // Merge details back into companyData for response
+            Object.assign(companyData, details);
         }
 
         // 4. Update log
@@ -97,8 +84,8 @@ exports.search = async (req, res) => {
 
         res.json({
             message: 'Search completed successfully',
-            companiesFound: results.length,
-            data: results
+            companiesFound: topResults.length,
+            data: topResults
         });
 
     } catch (error) {
