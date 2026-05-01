@@ -108,44 +108,95 @@ const SearchPage = () => {
         </div>
       )}
 
-      {/* Modal de Detalles Estilo Apple */}
+      {/* Modal de Detalles Blindado */}
       {showDetails && selectedCompany && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 z-[9999] animate-fade-in">
-          <div className="bg-slate-900 border border-white/10 max-w-lg w-full p-8 rounded-3xl relative shadow-[0_0_50px_rgba(79,70,229,0.3)]">
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.9)',
+            backdropFilter: 'blur(10px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px',
+            zIndex: 999999,
+            animation: 'fade-in 0.3s ease-out'
+          }}
+          onClick={() => setShowDetails(false)}
+        >
+          <div 
+            style={{
+              backgroundColor: '#1e293b',
+              border: '1px solid rgba(255,255,255,0.1)',
+              maxWidth: '600px',
+              width: '100%',
+              padding: '40px',
+              borderRadius: '24px',
+              position: 'relative',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
             <button 
               onClick={() => setShowDetails(false)}
-              className="absolute top-6 right-6 text-slate-500 hover:text-white text-3xl font-light"
+              style={{
+                position: 'absolute',
+                top: '20px',
+                right: '20px',
+                color: '#94a3b8',
+                fontSize: '32px',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer'
+              }}
             >
               &times;
             </button>
             
-            <div className="flex items-center gap-6 mb-8">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-pink-500 flex items-center justify-center text-4xl font-black text-white shadow-2xl">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '30px' }}>
+              <div style={{
+                width: '70px',
+                height: '70px',
+                borderRadius: '16px',
+                background: 'linear-gradient(135deg, #6366f1, #ec4899)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '30px',
+                fontWeight: '900',
+                color: 'white'
+              }}>
                 {selectedCompany.name?.charAt(0).toUpperCase()}
               </div>
               <div>
-                <h3 className="text-3xl font-black text-white">{selectedCompany.name}</h3>
-                <p className="text-indigo-400 font-bold uppercase text-[10px] tracking-[0.3em] mt-1">Prospecto Detectado</p>
+                <h3 style={{ fontSize: '28px', fontWeight: '900', color: 'white', margin: 0 }}>{selectedCompany.name}</h3>
+                <p style={{ color: '#6366f1', fontWeight: 'bold', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '2px', marginTop: '5px' }}>
+                  Prospecto Detectado en {country}
+                </p>
               </div>
             </div>
 
-            <div className="space-y-4">
-              <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
-                <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Email de Contacto</p>
-                <p className="text-white font-semibold">{selectedCompany.email || `contacto@${selectedCompany.name?.toLowerCase().replace(/\s/g, '')}.com`}</p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
+              <div style={{ background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '16px' }}>
+                <p style={{ color: '#64748b', fontSize: '10px', fontWeight: '900', textTransform: 'uppercase', marginBottom: '5px' }}>Email Directo</p>
+                <p style={{ color: 'white', fontWeight: '600' }}>{selectedCompany.email || `contacto@${selectedCompany.name?.toLowerCase().replace(/\s/g, '')}.com`}</p>
               </div>
               
-              <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
-                <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Teléfono / WhatsApp</p>
-                <p className="text-white font-semibold">{selectedCompany.phone || '+507 6000-0000'}</p>
+              <div style={{ background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '16px' }}>
+                <p style={{ color: '#64748b', fontSize: '10px', fontWeight: '900', textTransform: 'uppercase', marginBottom: '5px' }}>Teléfono / WhatsApp</p>
+                <p style={{ color: 'white', fontWeight: '600' }}>{selectedCompany.phone || '+507 6000-0000'}</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-4">
-                <button className="bg-green-600 hover:bg-green-500 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-green-900/20">
-                  WhatsApp
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', paddingTop: '10px' }}>
+                <button style={{ background: '#16a34a', color: 'white', padding: '15px', borderRadius: '12px', fontWeight: '900', border: 'none', cursor: 'pointer', fontSize: '12px' }}>
+                  WHATSAPP
                 </button>
-                <button className="bg-indigo-600 hover:bg-indigo-500 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-indigo-900/20">
-                  Ver Ads
+                <button style={{ background: '#4f46e5', color: 'white', padding: '15px', borderRadius: '12px', fontWeight: '900', border: 'none', cursor: 'pointer', fontSize: '12px' }}>
+                  VER ADS
                 </button>
               </div>
             </div>
