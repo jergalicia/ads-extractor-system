@@ -11,76 +11,45 @@ exports.search = async (req, res) => {
     try {
         console.log(`Starting search for: ${keyword} in ${country}`);
         
-        // 1. Log extraction start
-        const [logResult] = await db.execute(
-            'INSERT INTO extraction_logs (keyword_search, country, status) VALUES (?, ?, ?)',
-            [keyword, country || 'ALL', 'processing']
-        );
-        const logId = logResult.insertId;
-
-        // 2. Perform extraction
+        // 1. Perform extraction
         const results = await metaAdsExtractor.searchAds(keyword, country || 'ALL', status || 'active');
 
-        // 3. Process first 5 results for deep extraction to avoid timeouts
+        // 2. Process first 5 results for deep extraction
         const topResults = results.slice(0, 5);
-        let totalCompanies = 0;
-        let totalAds = 0;
 
         for (const companyData of topResults) {
-            let companyId;
-            let details = {};
-
             // Fetch real contact details
             if (companyData.pageId) {
                 try {
-                    details = await metaAdsExtractor.getPageDetails(companyData.pageId);
+                    const details = await metaAdsExtractor.getPageDetails(companyData.pageId);
+                    Object.assign(companyData, details);
                 } catch (err) {
                     console.error(`Error fetching details for ${companyData.name}:`, err.message);
                 }
             }
 
-            // Check if company exists
-            const [existing] = await db.execute('SELECT id FROM companies WHERE company_name = ?', [companyData.name]);
-
-            if (existing.length > 0) {
-                companyId = existing[0].id;
-                await db.execute(
-                    'UPDATE companies SET last_ad_date = NOW(), ads_count = ads_count + ? WHERE id = ?',
-                    [(companyData.ads && companyData.ads.length) || 1, companyId]
-                );
-            } else {
-                const [insertResult] = await db.execute(
-                    `INSERT INTO companies 
-                    (company_name, keyword_search, country, facebook_url, website_url, email, phone, whatsapp, instagram_url, ads_status, ads_count, opportunity_score) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                    [
-                        companyData.name || 'Sin Nombre', 
-                        keyword || '', 
-                        country || 'ALL', 
-                        details.facebookUrl || '', 
-                        details.website || null, 
-                        details.email || null, 
-                        details.phone || null, 
-                        details.phone || null, 
-                        details.instagram || null,
-                        status || 'active',
-                        (companyData.ads && companyData.ads.length) || 1,
-                        Math.floor(Math.random() * 30) + 70
-                    ]
-                );
-                companyId = insertResult.insertId;
-                totalCompanies++;
-            }
-
-            // Merge details back into companyData for response
-            Object.assign(companyData, details);
+            // Simple async save (don't block the response)
+            db.execute(
+                `INSERT INTO companies 
+                (company_name, keyword_search, country, facebook_url, website_url, email, phone, whatsapp, instagram_url, ads_status, ads_count, opportunity_score) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
+                ON DUPLICATE KEY UPDATE last_ad_date = NOW()`,
+                [
+                    companyData.name || 'Sin Nombre', 
+                    keyword || '', 
+                    country || 'ALL', 
+                    companyData.facebookUrl || '', 
+                    companyData.website || null, 
+                    companyData.email || null, 
+                    companyData.phone || null, 
+                    companyData.phone || null, 
+                    companyData.instagram || null,
+                    status || 'active',
+                    (companyData.ads && companyData.ads.length) || 1,
+                    Math.floor(Math.random() * 30) + 70
+                ]
+            ).catch(err => console.error("Database save error:", err.message));
         }
-
-        // 4. Update log
-        await db.execute(
-            'UPDATE extraction_logs SET total_companies = ?, total_ads = ?, status = ? WHERE id = ?',
-            [totalCompanies, totalAds, 'completed', logId]
-        );
 
         res.json({
             message: 'Search completed successfully',
